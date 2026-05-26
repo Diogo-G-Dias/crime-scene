@@ -64,53 +64,72 @@ class CrimeSceneOverlay extends Overlay
 		Point mouse = client.getMouseCanvasPosition();
 		graphics.setFont(graphics.getFont().deriveFont((float) config.fontSize()));
 		graphics.setStroke(new BasicStroke(2));
+		boolean instanced = client.isInInstancedRegion();
 
 		for (Map.Entry<WorldPoint, CrimeSceneMarker> entry : markers.entrySet())
 		{
 			WorldPoint worldPoint = entry.getKey();
-			if (worldPoint.getPlane() != plane)
-			{
-				continue;
-			}
-
 			CrimeSceneMarker marker = entry.getValue();
-			LocalPoint localPoint = LocalPoint.fromWorld(client, worldPoint);
-			if (localPoint == null)
-			{
-				continue;
-			}
 
-			Polygon poly = Perspective.getCanvasTilePoly(client, localPoint);
-			if (poly != null)
+			if (instanced)
 			{
-				graphics.setColor(fill);
-				graphics.fill(poly);
-				graphics.setColor(border);
-				graphics.draw(poly);
-
-				if (mouse != null && poly.contains(mouse.getX(), mouse.getY()))
+				// A template chunk may appear at several spots in the instance; draw at each
+				for (WorldPoint instancePoint : WorldPoint.toLocalInstance(client, worldPoint))
 				{
-					tooltipManager.add(new Tooltip(buildTooltip(marker)));
+					drawMarker(graphics, instancePoint, plane, marker, border, fill, font, skull, mouse);
 				}
 			}
-
-			boolean drawSkull = skull != null;
-			if (drawSkull)
+			else
 			{
-				OverlayUtil.renderImageLocation(client, graphics, localPoint, skull, 0);
-			}
-
-			String text = String.valueOf(marker.getNumber());
-			Point textLocation = Perspective.getCanvasTextLocation(client, graphics, localPoint, text, 0);
-			if (textLocation != null)
-			{
-				int yOffset = drawSkull ? skull.getHeight() / 2 + 4 : 0;
-				Point numberLocation = new Point(textLocation.getX(), textLocation.getY() - yOffset);
-				OverlayUtil.renderTextLocation(graphics, numberLocation, text, font);
+				drawMarker(graphics, worldPoint, plane, marker, border, fill, font, skull, mouse);
 			}
 		}
 
 		return null;
+	}
+
+	private void drawMarker(Graphics2D graphics, WorldPoint worldPoint, int plane, CrimeSceneMarker marker,
+		Color border, Color fill, Color font, BufferedImage skull, Point mouse)
+	{
+		if (worldPoint.getPlane() != plane)
+		{
+			return;
+		}
+
+		LocalPoint localPoint = LocalPoint.fromWorld(client, worldPoint);
+		if (localPoint == null)
+		{
+			return;
+		}
+
+		Polygon poly = Perspective.getCanvasTilePoly(client, localPoint);
+		if (poly != null)
+		{
+			graphics.setColor(fill);
+			graphics.fill(poly);
+			graphics.setColor(border);
+			graphics.draw(poly);
+
+			if (mouse != null && poly.contains(mouse.getX(), mouse.getY()))
+			{
+				tooltipManager.add(new Tooltip(buildTooltip(marker)));
+			}
+		}
+
+		boolean drawSkull = skull != null;
+		if (drawSkull)
+		{
+			OverlayUtil.renderImageLocation(client, graphics, localPoint, skull, 0);
+		}
+
+		String text = String.valueOf(marker.getNumber());
+		Point textLocation = Perspective.getCanvasTextLocation(client, graphics, localPoint, text, 0);
+		if (textLocation != null)
+		{
+			int yOffset = drawSkull ? skull.getHeight() / 2 + 4 : 0;
+			Point numberLocation = new Point(textLocation.getX(), textLocation.getY() - yOffset);
+			OverlayUtil.renderTextLocation(graphics, numberLocation, text, font);
+		}
 	}
 
 	private BufferedImage getScaledSkull(BufferedImage source, int percent)

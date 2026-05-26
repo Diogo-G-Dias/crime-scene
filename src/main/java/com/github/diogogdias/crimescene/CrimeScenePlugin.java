@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Actor;
 import net.runelite.api.Client;
 import net.runelite.api.Player;
+import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ActorDeath;
 import net.runelite.api.gameval.SpriteID;
@@ -151,7 +152,18 @@ public class CrimeScenePlugin extends Plugin
 			return;
 		}
 
-		WorldPoint location = actor.getWorldLocation();
+		WorldPoint location;
+		if (client.isInInstancedRegion())
+		{
+			// In instances, store the template chunk coordinate so the marker maps back on return
+			LocalPoint local = actor.getLocalLocation();
+			location = local != null ? WorldPoint.fromLocalInstance(client, local) : null;
+		}
+		else
+		{
+			location = actor.getWorldLocation();
+		}
+
 		if (location == null)
 		{
 			return;
