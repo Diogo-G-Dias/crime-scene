@@ -16,6 +16,12 @@ died the most.
 - Markers **persist** across logout (saved to your RuneLite profile)
 - Configurable colours and number size, and an optional clear-all hotkey
 
+## Screenshots
+
+![Death markers at the Nylocas room](screenshots/nylo.png)
+
+![Death markers in a cow field](screenshots/cows.png)
+
 ## Configuration
 
 | Setting | Default | Description |
