@@ -11,13 +11,16 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import net.runelite.client.ui.ColorScheme;
@@ -40,6 +43,7 @@ class CrimeScenePanel extends PluginPanel
 	private final CardLayout cardLayout = new CardLayout();
 	private final JPanel cards = new JPanel(cardLayout);
 	private Runnable clearCallback;
+	private BiConsumer<String, Boolean> deleteCallback;
 
 	CrimeScenePanel()
 	{
@@ -157,16 +161,21 @@ class CrimeScenePanel extends PluginPanel
 		this.clearCallback = clearCallback;
 	}
 
+	void setDeleteCallback(BiConsumer<String, Boolean> deleteCallback)
+	{
+		this.deleteCallback = deleteCallback;
+	}
+
 	void update(List<Map.Entry<String, Integer>> players, List<Map.Entry<String, Integer>> npcs)
 	{
 		SwingUtilities.invokeLater(() ->
 		{
-			populate(playersList, players);
-			populate(npcsList, npcs);
+			populate(playersList, players, false);
+			populate(npcsList, npcs, true);
 		});
 	}
 
-	private static void populate(JPanel listPanel, List<Map.Entry<String, Integer>> leaderboard)
+	private void populate(JPanel listPanel, List<Map.Entry<String, Integer>> leaderboard, boolean npcs)
 	{
 		listPanel.removeAll();
 
@@ -187,7 +196,7 @@ class CrimeScenePanel extends PluginPanel
 				{
 					listPanel.add(Box.createRigidArea(new Dimension(0, 4)));
 				}
-				listPanel.add(buildRow(rank++, entry.getKey(), entry.getValue()));
+				listPanel.add(buildRow(rank++, entry.getKey(), entry.getValue(), npcs));
 			}
 		}
 
@@ -195,7 +204,7 @@ class CrimeScenePanel extends PluginPanel
 		listPanel.repaint();
 	}
 
-	private static JPanel buildRow(int rank, String name, int deaths)
+	private JPanel buildRow(int rank, String name, int deaths, boolean npc)
 	{
 		JPanel row = new JPanel(new BorderLayout(8, 0));
 		row.setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -222,6 +231,25 @@ class CrimeScenePanel extends PluginPanel
 
 		row.add(left, BorderLayout.CENTER);
 		row.add(countLabel, BorderLayout.EAST);
+
+		JPopupMenu popup = new JPopupMenu();
+		JMenuItem delete = new JMenuItem("Delete tracker");
+		delete.addActionListener(e ->
+		{
+			if (deleteCallback != null)
+			{
+				deleteCallback.accept(name, npc);
+			}
+		});
+		popup.add(delete);
+
+		// Set on the row and let the child components inherit so a right-click anywhere shows the menu
+		row.setComponentPopupMenu(popup);
+		left.setInheritsPopupMenu(true);
+		rankLabel.setInheritsPopupMenu(true);
+		nameLabel.setInheritsPopupMenu(true);
+		countLabel.setInheritsPopupMenu(true);
+
 		return row;
 	}
 

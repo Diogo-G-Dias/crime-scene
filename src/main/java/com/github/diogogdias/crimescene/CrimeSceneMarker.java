@@ -25,6 +25,34 @@ class CrimeSceneMarker
 		this.plane = plane;
 	}
 
+	/**
+	 * Removes a tracked name from this tile, decrementing the death count by the removed total.
+	 *
+	 * @return the number of deaths removed (0 if the name was not present)
+	 */
+	int remove(String name, boolean npc)
+	{
+		Map<String, Integer> source = npc ? npcs : players;
+		if (source == null)
+		{
+			return 0;
+		}
+
+		Integer removed = source.remove(name);
+		if (removed == null)
+		{
+			return 0;
+		}
+
+		number -= removed;
+		return removed;
+	}
+
+	boolean isEmpty()
+	{
+		return number <= 0;
+	}
+
 	void record(String name, boolean npc)
 	{
 		number++;

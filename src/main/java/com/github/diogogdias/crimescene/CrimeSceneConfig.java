@@ -45,10 +45,21 @@ public interface CrimeSceneConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "markOtherPlayers",
+		name = "Mark other players",
+		description = "Mark the tile where any other player dies, not just friends, friends chat or clan members",
+		position = 3
+	)
+	default boolean markOtherPlayers()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 		keyName = "markSelfDeaths",
 		name = "Mark my own deaths",
 		description = "Also mark the tile where you die (works anywhere, no one else needs to witness it)",
-		position = 3
+		position = 4
 	)
 	default boolean markSelfDeaths()
 	{
@@ -59,7 +70,7 @@ public interface CrimeSceneConfig extends Config
 		keyName = "markNpcs",
 		name = "Mark NPCs",
 		description = "Also mark the tile where any NPC dies",
-		position = 4
+		position = 5
 	)
 	default boolean markNpcs()
 	{
@@ -70,7 +81,7 @@ public interface CrimeSceneConfig extends Config
 		keyName = "showSkull",
 		name = "Show skull",
 		description = "Draw the in-game skull sprite on the death tile",
-		position = 5
+		position = 6
 	)
 	default boolean showSkull()
 	{
@@ -82,7 +93,7 @@ public interface CrimeSceneConfig extends Config
 		keyName = "borderColor",
 		name = "Border colour",
 		description = "Tile border colour",
-		position = 6
+		position = 7
 	)
 	default Color borderColor()
 	{
@@ -94,7 +105,7 @@ public interface CrimeSceneConfig extends Config
 		keyName = "fillColor",
 		name = "Fill colour",
 		description = "Tile fill colour",
-		position = 7
+		position = 8
 	)
 	default Color fillColor()
 	{
@@ -106,7 +117,7 @@ public interface CrimeSceneConfig extends Config
 		keyName = "fontColor",
 		name = "Font colour",
 		description = "Colour of the death number drawn on the tile",
-		position = 8
+		position = 9
 	)
 	default Color fontColor()
 	{
@@ -118,7 +129,7 @@ public interface CrimeSceneConfig extends Config
 		keyName = "fontSize",
 		name = "Number size",
 		description = "Font size of the death number",
-		position = 9
+		position = 10
 	)
 	default int fontSize()
 	{
@@ -129,7 +140,7 @@ public interface CrimeSceneConfig extends Config
 		keyName = "clearHotkey",
 		name = "Clear-all hotkey",
 		description = "Hotkey to remove every marker (assign a key, and make sure the game has focus)",
-		position = 10
+		position = 11
 	)
 	default Keybind clearHotkey()
 	{

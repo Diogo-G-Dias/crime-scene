@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -111,6 +112,7 @@ public class CrimeScenePlugin extends Plugin
 			.build();
 		clientToolbar.addNavigation(navButton);
 		panel.setClearCallback(this::clearMarkers);
+		panel.setDeleteCallback(this::deleteTracker);
 		refreshPanel();
 
 		log.debug("Crime Scene started");
@@ -184,6 +186,11 @@ public class CrimeScenePlugin extends Plugin
 			return false;
 		}
 
+		if (config.markOtherPlayers())
+		{
+			return true;
+		}
+
 		if (config.markFriends() && client.isFriended(name, false))
 		{
 			return true;
@@ -202,6 +209,35 @@ public class CrimeScenePlugin extends Plugin
 		markers.clear();
 		configManager.unsetConfiguration(CONFIG_GROUP, MARKERS_KEY);
 		refreshPanel();
+	}
+
+	/**
+	 * Removes a single tracked name from every tile, dropping any tile left with no deaths.
+	 *
+	 * @param npcs true to delete from the NPC leaderboard, false for the player leaderboard
+	 */
+	void deleteTracker(String name, boolean npcs)
+	{
+		boolean changed = false;
+		Iterator<CrimeSceneMarker> it = markers.values().iterator();
+		while (it.hasNext())
+		{
+			CrimeSceneMarker marker = it.next();
+			if (marker.remove(name, npcs) > 0)
+			{
+				changed = true;
+				if (marker.isEmpty())
+				{
+					it.remove();
+				}
+			}
+		}
+
+		if (changed)
+		{
+			saveMarkers();
+			refreshPanel();
+		}
 	}
 
 	/**
